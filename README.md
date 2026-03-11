@@ -11,6 +11,7 @@ An interactive web-based grid generator with customizable start, end, and obstac
   3.  **End** (Red) - Only one cell can be the end at a time.
   4.  **Obstacle** (Gray) - Obstacles are dynamically limited based on the grid size.
 - **Obstacle Limit**: The number of obstacle cells is limited to $n - 1$ to ensure there is always a potential path in pathfinding algorithms that might use this grid. The UI dynamically shows the current limit.
+- **Value Iteration Planning**: Input your custom Goal Reward, Step Penalty, Obstacle Penalty, and Discount Factor. Click "Plan" to run the Value Iteration algorithm and instantly visualize the resulting **Value Matrix** and **Policy Matrix** side-by-side! 
 - **Modern UI/UX**: Features a clean, dark-themed glassmorphism design with responsive elements and smooth pop-in animations.
 
 ## How to Run
@@ -21,6 +22,7 @@ Since this is a vanilla HTML/CSS/JS project, you don't need to install any depen
 2. Open the `index.html` file in any modern web browser.
 3. Use the input box to select your grid size and click **Generate Square**.
 4. Click on the cells to place your Start, End, and Obstacle blocks according to the cycling rules!
+5. Setup your custom rewards/penalties, and click the **Plan** button to see the Value Iteration results.
 
 ## Technologies Used
 - HTML5

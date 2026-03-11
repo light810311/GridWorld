@@ -86,6 +86,24 @@ header p {
     justify-content: center;
 }
 
+.rewards-group {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.25rem;
+    margin-top: 1.25rem;
+}
+
+.reward-input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.reward-input label {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
 label {
     font-weight: 500;
     font-size: 1.1rem;
@@ -119,6 +137,15 @@ button {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.plan-btn {
+    background: #8b5cf6;
+}
+
+.plan-btn:hover {
+    background: #7c3aed;
+    box-shadow: 0 8px 15px rgba(139, 92, 246, 0.3);
 }
 
 button:hover {
@@ -292,6 +319,123 @@ button:active {
         transform: translateY(0);
     }
 }
+
+/* Results Section */
+.results-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    width: 100%;
+    margin-top: 2rem;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.results-section.hidden {
+    display: none;
+}
+
+.result-card {
+    flex: 1;
+    min-width: 300px;
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    padding: 2rem 1.5rem;
+    box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.result-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #f8fafc;
+    font-weight: 600;
+}
+
+/* Policy Arrow Styling */
+.policy-arrow {
+    position: absolute;
+    width: 30%;
+    height: 30%;
+    /* Create a basic arrow using borders and rotation */
+}
+
+/* Arrow structure using a pseudo element */
+.policy-arrow::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background-color: var(--text-primary);
+    transform: translate(-50%, -50%);
+}
+
+.policy-arrow::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0;
+    /* Align to end of line */
+    width: 8px;
+    height: 8px;
+    border-top: 2px solid var(--text-primary);
+    border-right: 2px solid var(--text-primary);
+    transform: translate(0, -50%) rotate(45deg);
+    transform-origin: center right;
+}
+
+.arrow-up {
+    top: 10%;
+    left: 35%;
+    transform: rotate(-90deg);
+}
+
+.arrow-right {
+    top: 35%;
+    right: 10%;
+}
+
+.arrow-down {
+    bottom: 10%;
+    left: 35%;
+    transform: rotate(90deg);
+}
+
+.arrow-left {
+    top: 35%;
+    left: 10%;
+    transform: rotate(180deg);
+}
+
+/* Remove hover effect from result grid cells to keep them static */
+#value-matrix-container .grid-cell,
+#policy-matrix-container .grid-cell {
+    cursor: default;
+}
+
+#value-matrix-container .grid-cell:hover,
+#policy-matrix-container .grid-cell:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+#value-matrix-container .grid-cell:hover::after,
+#policy-matrix-container .grid-cell:hover::after {
+    opacity: 0;
+}
+
+#value-matrix-container .grid-cell,
+#policy-matrix-container .grid-cell {
+    font-size: clamp(0.7rem, 1.5vw, 1rem);
+    /* slightly smaller for values */
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 640px) {
