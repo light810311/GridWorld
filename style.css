@@ -36,7 +36,7 @@ body {
 }
 
 .container {
-    max-width: 800px;
+    max-width: 1400px;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -72,6 +72,8 @@ header p {
     padding: 1.5rem;
     box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.4);
     transition: transform 0.3s ease;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
 .controls-card:hover {
@@ -214,7 +216,8 @@ button:active {
     padding: 6px;
     border-radius: 0.75rem;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-    max-width: 100%;
+    width: 100%;
+    max-width: 600px;
 }
 
 .grid-cell {
@@ -222,9 +225,9 @@ button:active {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: clamp(35px, 8vw, 65px);
-    height: clamp(35px, 8vw, 65px);
-    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    width: 100%;
+    aspect-ratio: 1;
+    font-size: clamp(0.75rem, 2vw, 1.25rem);
     font-weight: 600;
     color: var(--text-secondary);
     cursor: pointer;
@@ -442,25 +445,30 @@ button:active {
 
 /* Remove hover effect from result grid cells to keep them static */
 #value-matrix-container .grid-cell,
-#policy-matrix-container .grid-cell {
+#policy-matrix-container .grid-cell,
+#best-path-matrix-container .grid-cell {
     cursor: default;
 }
 
 #value-matrix-container .grid-cell:hover,
-#policy-matrix-container .grid-cell:hover {
+#policy-matrix-container .grid-cell:hover,
+#best-path-matrix-container .grid-cell:hover {
     transform: none;
     box-shadow: none;
 }
 
 #value-matrix-container .grid-cell:hover::after,
-#policy-matrix-container .grid-cell:hover::after {
+#policy-matrix-container .grid-cell:hover::after,
+#best-path-matrix-container .grid-cell:hover::after {
     opacity: 0;
 }
 
 #value-matrix-container .grid-cell,
-#policy-matrix-container .grid-cell {
-    font-size: clamp(0.7rem, 1.5vw, 1rem);
-    /* slightly smaller for values */
+#policy-matrix-container .grid-cell,
+#best-path-matrix-container .grid-cell {
+    font-size: clamp(0.55rem, 1vw, 0.9rem);
+    line-height: 1.1;
+    /* slightly smaller for values to fit 10x10 */
 }
 
 
