@@ -84,9 +84,9 @@ Once the values converge, the optimal policy $\pi^*(s)$ is extracted by acting g
 ### Policy Iteration
 Policy Iteration interleaves two distinct steps until the policy stops changing:
 1. **Policy Evaluation**: Calculate the value function $V^\pi(s)$ for the current policy $\pi$ by iteratively solving the Bellman Expectation Equation:
-   $$ V^\pi(s) \leftarrow R(s, \pi(s), s') + \gamma V^\pi(s') $$
+   $V^\pi(s) \leftarrow R(s, \pi(s), s') + \gamma V^\pi(s')$
 2. **Policy Improvement**: Update the policy by acting greedily with respect to the newly evaluated value function:
-   $$ \pi'(s) \leftarrow \arg\max_a \left[ R(s, a, s') + \gamma V^\pi(s') \right] $$
+   $\pi'(s) \leftarrow \arg\max_a \left[ R(s, a, s') + \gamma V^\pi(s') \right]$
 
 If the new policy $\pi'$ is identical to the old policy $\pi$, the algorithm has converged to the optimal policy.
 
