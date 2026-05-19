@@ -62,7 +62,7 @@ Because this is a vanilla HTML/CSS/JS project, you don't need to install any hea
 - **JavaScript**: 
   - Vanilla JS (ES6+)
   - DOM Manipulation without external libraries like React/Vue
-  - Custom implementation of the Value Iteration algorithmic loop
+  - Custom implementation of both Value Iteration and Policy Iteration algorithmic loops
 
 ## 📐 Algorithm Deep Dive
 
