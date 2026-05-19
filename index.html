@@ -65,32 +65,80 @@
                 </div>
             </div>
 
-            <!-- Value Iteration Results Section -->
+            <!-- Results Section -->
             <div id="results-section" class="results-section hidden">
-                <div class="result-card">
-                    <h2 class="result-title">Value Matrix</h2>
-                    <div class="grid-wrapper">
-                        <div class="grid-container" id="value-matrix-container">
-                            <!-- Value matrix cells injected via JS -->
+                <!-- Value Iteration Results -->
+                <div class="algorithm-group">
+                    <h2 class="algorithm-header">Value Iteration <span class="stats" id="vi-stats"></span></h2>
+                    <div class="algorithm-matrices">
+                        <div class="result-card">
+                            <h2 class="result-title">Value Matrix</h2>
+                            <div class="grid-wrapper">
+                                <div class="grid-container" id="vi-value-matrix-container"></div>
+                            </div>
+                        </div>
+                        <div class="result-card">
+                            <h2 class="result-title">Policy Matrix</h2>
+                            <div class="grid-wrapper">
+                                <div class="grid-container" id="vi-policy-matrix-container"></div>
+                            </div>
+                        </div>
+                        <div class="result-card">
+                            <h2 class="result-title">Best Path</h2>
+                            <div class="grid-wrapper">
+                                <div class="grid-container" id="vi-best-path-matrix-container"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="result-card">
-                    <h2 class="result-title">Policy Matrix</h2>
-                    <div class="grid-wrapper">
-                        <div class="grid-container" id="policy-matrix-container">
-                            <!-- Policy matrix cells injected via JS -->
+                <!-- Policy Iteration Results -->
+                <div class="algorithm-group">
+                    <h2 class="algorithm-header">Policy Iteration <span class="stats" id="pi-stats"></span></h2>
+                    <div class="algorithm-matrices">
+                        <div class="result-card">
+                            <h2 class="result-title">Value Matrix</h2>
+                            <div class="grid-wrapper">
+                                <div class="grid-container" id="pi-value-matrix-container"></div>
+                            </div>
+                        </div>
+                        <div class="result-card">
+                            <h2 class="result-title">Policy Matrix</h2>
+                            <div class="grid-wrapper">
+                                <div class="grid-container" id="pi-policy-matrix-container"></div>
+                            </div>
+                        </div>
+                        <div class="result-card">
+                            <h2 class="result-title">Best Path</h2>
+                            <div class="grid-wrapper">
+                                <div class="grid-container" id="pi-best-path-matrix-container"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="result-card">
-                    <h2 class="result-title">Best Path</h2>
-                    <div class="grid-wrapper">
-                        <div class="grid-container" id="best-path-matrix-container">
-                            <!-- Best path cells injected via JS -->
-                        </div>
+            <!-- Algorithm Comparison Section -->
+            <div class="comparison-section">
+                <h2>Value Iteration vs Policy Iteration</h2>
+                <div class="comparison-grid">
+                    <div class="comparison-card">
+                        <h3>Value Iteration</h3>
+                        <p>Computes the absolute optimal value function first, repeatedly updating values across all states, and only extracts the optimal policy once at the very end.</p>
+                        <ul>
+                            <li>Simpler per sweep (no inner loop)</li>
+                            <li>May take many iterations to converge</li>
+                            <li>Updates values space</li>
+                        </ul>
+                    </div>
+                    <div class="comparison-card">
+                        <h3>Policy Iteration</h3>
+                        <p>Starts with a complete policy, evaluates it fully, and then improves it. Because it searches the space of policies rather than the space of continuous values, it often converges in significantly fewer iterations.</p>
+                        <ul>
+                            <li>More complex per sweep (evaluation + improvement)</li>
+                            <li>Usually converges in fewer outer iterations</li>
+                            <li>Updates policy space</li>
+                        </ul>
                     </div>
                 </div>
             </div>

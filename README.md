@@ -9,7 +9,7 @@
 
 ## 📖 Introduction
 
-**GridWorld** is a classic Reinforcement Learning environment brought to life in your browser. This project allows you to construct dynamic mazes, configure Markov Decision Process (MDP) parameters, and watch the legendary **Value Iteration** algorithm compute the optimal policy and shortest path right before your eyes!
+**GridWorld** is a classic Reinforcement Learning environment brought to life in your browser. This project allows you to construct dynamic mazes, configure Markov Decision Process (MDP) parameters, and watch the legendary **Value Iteration** and **Policy Iteration** algorithms compute the optimal policy and shortest path right before your eyes!
 
 Whether you are a student learning about Dynamic Programming, an educator demonstrating AI pathfinding, or just someone who enjoys interactive web widgets, this tool provides a hands-on experience with core RL concepts.
 
@@ -26,11 +26,12 @@ Whether you are a student learning about Dynamic Programming, an educator demons
   - **Step Penalty**: The cost of taking a single step (e.g., `-0.1` to encourage shorter, more efficient paths).
   - **Obstacle Penalty**: The cost/penalty of hitting an obstacle (e.g., `-1`).
   - **Discount Factor ($\gamma$)**: Determines the importance of future rewards vs immediate rewards (e.g., `0.9`).
-- **🧠 Real-time Value Iteration**: Click **Plan** to instantly run the Value Iteration algorithm.
-- **📊 Comprehensive Visualizations**: Once planned, the app visually renders three distinct matrices:
+- **🧠 Real-time Simultaneous Planning**: Click **Plan** to instantly run **both** Value Iteration and Policy Iteration simultaneously. The app tracks the execution time and number of iterations, allowing you to compare their performance in real-time!
+- **📊 Comprehensive Visualizations**: Once planned, the app visually renders distinct matrix sets for both algorithms:
   1.  **Value Matrix**: The converged max expected utility ($V(s)$) for every state.
   2.  **Policy Matrix**: Arrow vectors ($\uparrow, \downarrow, \leftarrow, \rightarrow$) showing the greedy optimal action(s) for every state.
   3.  **Best Path Matrix**: Highlights the single optimal continuous route from the Start state to the End state based on the calculated policy.
+- **⚖️ Algorithm Comparison**: A dedicated section at the bottom of the page breaks down the pros, cons, and differences between Value Iteration and Policy Iteration.
 - **🎨 Modern UI/UX**: Designed with a clean, dark-themed glassmorphism aesthetic, responsive CSS Grid layouts, and smooth CSS pop-in animations.
 
 ## 🚀 How to Run (Local Installation)
@@ -48,7 +49,7 @@ Because this is a vanilla HTML/CSS/JS project, you don't need to install any hea
    - Set your grid size using the input box and click **Generate Square**.
    - Design your map by clicking on the cells to place your Start, End, and Obstacle blocks.
    - Tweak your MDP rewards/penalties to see how it affects the agent's behavior.
-   - Click the **Plan** button to witness the Value Iteration results and the Best Path visualization.
+   - Click the **Plan** button to witness both algorithms execute simultaneously. Compare their real-time stats and their resulting Best Path visualizations side-by-side!
 
 ## 🛠️ Technologies Used
 
@@ -63,27 +64,39 @@ Because this is a vanilla HTML/CSS/JS project, you don't need to install any hea
   - DOM Manipulation without external libraries like React/Vue
   - Custom implementation of the Value Iteration algorithmic loop
 
-## 📐 Algorithm Deep Dive: Value Iteration
+## 📐 Algorithm Deep Dive
 
-This application uses **Value Iteration**, a fundamental algorithm in Reinforcement Learning used to solve Markov Decision Processes (MDPs) assuming optimal knowledge of the environment.
+This application supports two fundamental Dynamic Programming algorithms in Reinforcement Learning used to solve Markov Decision Processes (MDPs):
 
-### Mathematical Formulation
-The algorithm repeatedly applies the **Bellman Optimality Equation** until the state values converge. For every state $s$, the value $V(s)$ is updated by finding the maximum expected return across all possible actions $a$:
+### Value Iteration
+Value Iteration repeatedly applies the **Bellman Optimality Equation** until the state values converge. For every state $s$, the value $V(s)$ is updated by finding the maximum expected return across all possible actions $a$:
 
 $$ V(s) \leftarrow \max_a \left[ R(s, a, s') + \gamma V(s') \right] $$
 
 Where:
 - $a \in \{\text{Up}, \text{Down}, \text{Left}, \text{Right}\}$
-- $R(s, a, s')$ is the immediate reward of taking action $a$ in state $s$ (e.g., Step Penalty, Obstacle Penalty, or Goal Reward).
+- $R(s, a, s')$ is the immediate reward of taking action $a$ in state $s$.
 - $\gamma$ (gamma) is the discount factor.
 - $V(s')$ is the value of the resulting next state $s'$.
 
-### Policy Extraction
-Once the values coverage (when the maximum change in any state value drops below a tiny threshold $\theta$), the optimal policy $\pi^*(s)$ is extracted by simply acting greedily with respect to the final value function:
+Once the values converge, the optimal policy $\pi^*(s)$ is extracted by acting greedily with respect to the final value function.
 
-$$ \pi^*(s) = \arg\max_a \left[ R(s, a, s') + \gamma V(s') \right] $$
+### Policy Iteration
+Policy Iteration interleaves two distinct steps until the policy stops changing:
+1. **Policy Evaluation**: Calculate the value function $V^\pi(s)$ for the current policy $\pi$ by iteratively solving the Bellman Expectation Equation:
+   $$ V(s) \leftarrow R(s, \pi(s), s') + \gamma V(s') $$
+2. **Policy Improvement**: Update the policy by acting greedily with respect to the newly evaluated value function:
+   $$ \pi'(s) \leftarrow \arg\max_a \left[ R(s, a, s') + \gamma V(s') \right] $$
 
-Our **Best Path** visualization follows this exact policy matrix from the Start State to automatically trace the optimal route!
+If the new policy $\pi'$ is identical to the old policy $\pi$, the algorithm has converged to the optimal policy.
+
+### Comparison: Value Iteration vs Policy Iteration
+While both algorithms compute the optimal policy for an MDP, they differ in their approach:
+- **Value Iteration** computes the absolute optimal value function first, repeatedly updating values across all states, and only extracts the optimal policy once at the very end. It's often computationally simpler per sweep but may take many iterations to converge.
+- **Policy Iteration** starts with a complete policy, evaluates it fully, and then improves it. Because it searches the space of policies rather than the space of continuous values, it often converges in significantly fewer iterations, although the policy evaluation step can be computationally expensive for very large state spaces.
+
+### Policy Extraction & Visualization
+For both algorithms, our **Best Path** visualization follows the optimal policy matrix from the Start State to automatically trace the optimal route!
 
 ## 🤝 Contributing
 Contributions, issues, and feature requests are welcome! Feel free to check the issues page.

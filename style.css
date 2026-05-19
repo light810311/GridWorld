@@ -129,6 +129,7 @@ input[type="number"]:focus {
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
 }
 
+
 button {
     background: var(--accent-color);
     color: white;
@@ -332,11 +333,51 @@ button:active {
 /* Results Section */
 .results-section {
     display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
+    flex-direction: column;
+    gap: 3rem;
     width: 100%;
     margin-top: 2rem;
     animation: fadeIn 0.8s ease-out;
+}
+
+.algorithm-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.algorithm-group:last-child {
+    border-bottom: none;
+}
+
+.algorithm-header {
+    font-size: 2rem;
+    color: #f8fafc;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid var(--accent-color);
+    padding-left: 1rem;
+}
+
+.stats {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: rgba(15, 23, 42, 0.5);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.algorithm-matrices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    width: 100%;
 }
 
 .results-section.hidden {
@@ -471,6 +512,65 @@ button:active {
     /* slightly smaller for values to fit 10x10 */
 }
 
+
+/* Comparison Section */
+.comparison-section {
+    margin-top: 3rem;
+    width: 100%;
+    animation: fadeIn 0.8s ease-out;
+}
+
+.comparison-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: #f8fafc;
+    font-weight: 600;
+    text-align: center;
+}
+
+.comparison-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.comparison-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1rem;
+    padding: 2rem 1.5rem;
+    box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease;
+}
+
+.comparison-card:hover {
+    transform: translateY(-5px);
+}
+
+.comparison-card h3 {
+    font-size: 1.3rem;
+    color: var(--accent-color);
+    margin-bottom: 1rem;
+}
+
+.comparison-card p {
+    color: var(--text-primary);
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.comparison-card ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    color: var(--text-secondary);
+}
+
+.comparison-card li {
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
 
 /* Responsive adjustments */
 @media (max-width: 640px) {

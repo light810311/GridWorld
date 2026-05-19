@@ -5,9 +5,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const gridTitle = document.getElementById('grid-title');
     const gridContainer = document.getElementById('grid-container');
     const resultsSection = document.getElementById('results-section');
-    const valueMatrixContainer = document.getElementById('value-matrix-container');
-    const policyMatrixContainer = document.getElementById('policy-matrix-container');
-    const bestPathMatrixContainer = document.getElementById('best-path-matrix-container');
+    const viValueMatrixContainer = document.getElementById('vi-value-matrix-container');
+    const viPolicyMatrixContainer = document.getElementById('vi-policy-matrix-container');
+    const viBestPathMatrixContainer = document.getElementById('vi-best-path-matrix-container');
+    const piValueMatrixContainer = document.getElementById('pi-value-matrix-container');
+    const piPolicyMatrixContainer = document.getElementById('pi-policy-matrix-container');
+    const piBestPathMatrixContainer = document.getElementById('pi-best-path-matrix-container');
+    const viStats = document.getElementById('vi-stats');
+    const piStats = document.getElementById('pi-stats');
     // Reward inputs
     const goalRewardInput = document.getElementById('goal-reward');
     const stepPenaltyInput = document.getElementById('step-penalty');
@@ -143,22 +148,16 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsSection.classList.remove('hidden');
 
         // Setup the matrices containers CSS grid
-        valueMatrixContainer.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
-        valueMatrixContainer.style.gridTemplateRows = `repeat(${n}, 1fr)`;
-        policyMatrixContainer.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
-        policyMatrixContainer.style.gridTemplateRows = `repeat(${n}, 1fr)`;
-        bestPathMatrixContainer.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
-        bestPathMatrixContainer.style.gridTemplateRows = `repeat(${n}, 1fr)`;
-
-        // Clear existing results
-        valueMatrixContainer.innerHTML = '';
-        policyMatrixContainer.innerHTML = '';
-        bestPathMatrixContainer.innerHTML = '';
+        [viValueMatrixContainer, viPolicyMatrixContainer, viBestPathMatrixContainer, 
+         piValueMatrixContainer, piPolicyMatrixContainer, piBestPathMatrixContainer].forEach(container => {
+            container.style.gridTemplateColumns = `repeat(${n}, 1fr)`;
+            container.style.gridTemplateRows = `repeat(${n}, 1fr)`;
+            container.innerHTML = '';
+        });
 
         // Internal representation
         // Grid is n x n. (0,0) is top-left in display, but let's just use 1D array index (0 to n*n-1)
         const states = Array.from(gridContainer.children); // Have type 'empty', 'start', 'end', 'obstacle'
-        let V = new Array(n * n).fill(0);
 
         // Map UI index to 0-based coordinate system (row, col)
         const getRowCol = (index) => ({ r: Math.floor(index / n), c: index % n });
@@ -204,180 +203,160 @@ document.addEventListener('DOMContentLoaded', () => {
             return { nextState: nIndex, reward: stepPenalty };
         };
 
-        // Value Iteration
         const theta = 1e-4; // Convergence threshold
-        let maxChange = Infinity;
-        let iter = 0;
         const maxIter = 1000;
 
-        while (maxChange > theta && iter < maxIter) {
-            maxChange = 0;
-            const nextV = [...V];
-
+        // --- VALUE ITERATION ---
+        let vIter = 0;
+        let vMaxChange = Infinity;
+        let V_vi = new Array(n * n).fill(0);
+        const viStartTime = performance.now();
+        
+        while (vMaxChange > theta && vIter < maxIter) {
+            vMaxChange = 0;
+            const nextV = [...V_vi];
             for (let i = 0; i < n * n; i++) {
-                // Skip if it's the end state or obstacle
-                if (states[i].dataset.type === 'end') {
-                    nextV[i] = 0; // Value of absorbing state is 0
-                    continue;
+                if (states[i].dataset.type === 'end' || states[i].dataset.type === 'obstacle') {
+                    nextV[i] = 0; continue;
                 }
-                if (states[i].dataset.type === 'obstacle') {
-                    nextV[i] = 0;
-                    continue;
-                }
-
                 let maxQ = -Infinity;
                 for (const a of actions) {
                     const { nextState, reward } = getTransition(i, a);
-                    const q = reward + discountFactor * V[nextState];
-                    if (q > maxQ) {
-                        maxQ = q;
-                    }
+                    const q = reward + discountFactor * V_vi[nextState];
+                    if (q > maxQ) maxQ = q;
                 }
-
-                maxChange = Math.max(maxChange, Math.abs(maxQ - V[i]));
+                vMaxChange = Math.max(vMaxChange, Math.abs(maxQ - V_vi[i]));
                 nextV[i] = maxQ;
             }
-            V = nextV;
-            iter++;
+            V_vi = nextV;
+            vIter++;
         }
+        const viEndTime = performance.now();
+        viStats.textContent = `(Converged in ${vIter} iterations, ${(viEndTime - viStartTime).toFixed(1)} ms)`;
 
-        // Find Best Path
-        const bestPath = new Set();
-        let currentState = states.findIndex(s => s.dataset.type === 'start');
-        let pathLength = 0;
-        const maxPathLength = n * n; // prevent infinite loop
+        // --- POLICY ITERATION ---
+        let pIter = 0;
+        let V_pi = new Array(n * n).fill(0);
+        let policy_pi = new Array(n * n).fill('up');
+        let isPolicyStable = false;
+        const piStartTime = performance.now();
 
-        while (currentState !== -1 && currentState !== endStateIndex && pathLength < maxPathLength) {
-            bestPath.add(currentState);
-            
-            let maxQ = -Infinity;
-            let bestNextState = -1;
-            
-            for (const a of actions) {
-                const { nextState, reward } = getTransition(currentState, a);
-                const q = reward + discountFactor * V[nextState];
-                // Introduce a slight preference to pick first equivalent action to avoid getting stuck 
-                if (q > maxQ + 1e-6) {
-                    maxQ = q;
-                    bestNextState = nextState;
+        while (!isPolicyStable && pIter < maxIter) {
+            let evalMaxChange = Infinity;
+            let evalIter = 0;
+            while (evalMaxChange > theta && evalIter < maxIter) {
+                evalMaxChange = 0;
+                const nextV = [...V_pi];
+                for (let i = 0; i < n * n; i++) {
+                    if (states[i].dataset.type === 'end' || states[i].dataset.type === 'obstacle') {
+                        nextV[i] = 0; continue;
+                    }
+                    const actionId = policy_pi[i];
+                    const a = actions.find(act => act.id === actionId);
+                    const { nextState, reward } = getTransition(i, a);
+                    const v = reward + discountFactor * V_pi[nextState];
+                    evalMaxChange = Math.max(evalMaxChange, Math.abs(v - V_pi[i]));
+                    nextV[i] = v;
                 }
+                V_pi = nextV;
+                evalIter++;
             }
-            
-            // If we are bouncing to the same state (wall), and not reaching goal, break
-            if (bestNextState === currentState || bestNextState === -1) {
-                break;
-            }
-            // If the next state is already in bestPath, we are in a loop
-            if (bestPath.has(bestNextState)) {
-                break;
-            }
-            currentState = bestNextState;
-            pathLength++;
-        }
-        if (currentState === endStateIndex) {
-            bestPath.add(endStateIndex);
-        }
 
-        // Policy Extraction and Rendering
-        for (let i = 0; i < n * n; i++) {
-            const type = states[i].dataset.type;
-
-            // Create Value matrix cell
-            const vCell = document.createElement('div');
-            vCell.className = `grid-cell ${type}`;
-            if (type === 'obstacle') {
-                vCell.textContent = ''; // Blank or maybe 'X'
-            } else if (type === 'end') {
-                vCell.textContent = '0'; // Terminal state 
-            } else {
-                vCell.textContent = V[i].toFixed(2);
-            }
-            valueMatrixContainer.appendChild(vCell);
-
-            // Create Policy matrix cell
-            const pCell = document.createElement('div');
-            pCell.className = `grid-cell ${type}`;
-            if (type !== 'end' && type !== 'obstacle') {
-                // Find best actions
+            isPolicyStable = true;
+            for (let i = 0; i < n * n; i++) {
+                if (states[i].dataset.type === 'end' || states[i].dataset.type === 'obstacle') continue;
+                const oldActionId = policy_pi[i];
                 let maxQ = -Infinity;
-                let bestActions = [];
-
+                let bestActionId = oldActionId;
                 for (const a of actions) {
                     const { nextState, reward } = getTransition(i, a);
-                    const q = reward + discountFactor * V[nextState];
-
-                    // Allow for a tiny bit of floating point inaccuracy
+                    const q = reward + discountFactor * V_pi[nextState];
                     if (q > maxQ + 1e-6) {
                         maxQ = q;
-                        bestActions = [a.id];
-                    } else if (Math.abs(q - maxQ) <= 1e-6) {
-                        bestActions.push(a.id);
+                        bestActionId = a.id;
                     }
                 }
-
-                // Append arrows for best actions
-                bestActions.forEach(actionId => {
-                    const arrow = document.createElement('div');
-                    arrow.className = `policy-arrow arrow-${actionId}`;
-                    pCell.appendChild(arrow);
-                });
-            }
-            policyMatrixContainer.appendChild(pCell);
-
-            // Create Best Path matrix cell
-            const bpCell = document.createElement('div');
-            bpCell.className = `grid-cell ${type}`;
-            if (bestPath.has(i) && type !== 'start' && type !== 'end') {
-                bpCell.classList.add('path');
-            }
-
-            if (type !== 'end' && type !== 'obstacle') {
-                let maxQ = -Infinity;
-                let bestActions = [];
-
-                for (const a of actions) {
-                    const { nextState, reward } = getTransition(i, a);
-                    const q = reward + discountFactor * V[nextState];
-
-                    if (q > maxQ + 1e-6) {
-                        maxQ = q;
-                        bestActions = [a.id];
-                    } else if (Math.abs(q - maxQ) <= 1e-6) {
-                        bestActions.push(a.id);
-                    }
+                if (oldActionId !== bestActionId) {
+                    policy_pi[i] = bestActionId;
+                    isPolicyStable = false;
                 }
-
-                bestActions.forEach(actionId => {
-                    const arrow = document.createElement('div');
-                    arrow.className = `policy-arrow arrow-${actionId}`;
-                    bpCell.appendChild(arrow);
-                });
             }
-            
-            if (type === 'start') {
-                const label = document.createElement('div');
-                label.textContent = 'START';
-                label.style.position = 'absolute';
-                label.style.top = '2px';
-                label.style.left = '4px';
-                label.style.fontSize = '10px';
-                label.style.color = '#020617';
-                label.style.fontWeight = '700';
-                bpCell.appendChild(label);
-            } else if (type === 'end') {
-                const label = document.createElement('div');
-                label.textContent = 'END';
-                label.style.position = 'absolute';
-                label.style.bottom = '2px';
-                label.style.right = '4px';
-                label.style.fontSize = '10px';
-                label.style.color = '#020617';
-                label.style.fontWeight = '700';
-                bpCell.appendChild(label);
-            }
-
-            bestPathMatrixContainer.appendChild(bpCell);
+            pIter++;
         }
+        const piEndTime = performance.now();
+        piStats.textContent = `(Converged in ${pIter} outer iterations, ${(piEndTime - piStartTime).toFixed(1)} ms)`;
+
+        // Helper function to find best path and render
+        function renderAlgorithm(V, valContainer, polContainer, pathContainer) {
+            const bestPath = new Set();
+            let currentState = states.findIndex(s => s.dataset.type === 'start');
+            let pathLength = 0;
+            while (currentState !== -1 && currentState !== endStateIndex && pathLength < n * n) {
+                bestPath.add(currentState);
+                let maxQ = -Infinity;
+                let bestNextState = -1;
+                for (const a of actions) {
+                    const { nextState, reward } = getTransition(currentState, a);
+                    const q = reward + discountFactor * V[nextState];
+                    if (q > maxQ + 1e-6) {
+                        maxQ = q;
+                        bestNextState = nextState;
+                    }
+                }
+                if (bestNextState === currentState || bestNextState === -1 || bestPath.has(bestNextState)) break;
+                currentState = bestNextState;
+                pathLength++;
+            }
+            if (currentState === endStateIndex) bestPath.add(endStateIndex);
+
+            for (let i = 0; i < n * n; i++) {
+                const type = states[i].dataset.type;
+
+                const vCell = document.createElement('div');
+                vCell.className = `grid-cell ${type}`;
+                if (type === 'obstacle') vCell.textContent = '';
+                else if (type === 'end') vCell.textContent = '0';
+                else vCell.textContent = V[i].toFixed(2);
+                valContainer.appendChild(vCell);
+
+                const pCell = document.createElement('div');
+                pCell.className = `grid-cell ${type}`;
+                const bpCell = document.createElement('div');
+                bpCell.className = `grid-cell ${type}`;
+
+                if (bestPath.has(i) && type !== 'start' && type !== 'end') bpCell.classList.add('path');
+
+                if (type !== 'end' && type !== 'obstacle') {
+                    let maxQ = -Infinity;
+                    let bestActions = [];
+                    for (const a of actions) {
+                        const { nextState, reward } = getTransition(i, a);
+                        const q = reward + discountFactor * V[nextState];
+                        if (q > maxQ + 1e-6) { maxQ = q; bestActions = [a.id]; }
+                        else if (Math.abs(q - maxQ) <= 1e-6) bestActions.push(a.id);
+                    }
+                    bestActions.forEach(actionId => {
+                        const arrow1 = document.createElement('div');
+                        arrow1.className = `policy-arrow arrow-${actionId}`;
+                        pCell.appendChild(arrow1);
+                        const arrow2 = document.createElement('div');
+                        arrow2.className = `policy-arrow arrow-${actionId}`;
+                        bpCell.appendChild(arrow2);
+                    });
+                }
+                if (type === 'start') {
+                    bpCell.innerHTML += '<div style="position:absolute;top:2px;left:4px;font-size:10px;color:#020617;font-weight:700;">START</div>';
+                } else if (type === 'end') {
+                    bpCell.innerHTML += '<div style="position:absolute;bottom:2px;right:4px;font-size:10px;color:#020617;font-weight:700;">END</div>';
+                }
+                
+                polContainer.appendChild(pCell);
+                pathContainer.appendChild(bpCell);
+            }
+        }
+
+        renderAlgorithm(V_vi, viValueMatrixContainer, viPolicyMatrixContainer, viBestPathMatrixContainer);
+        renderAlgorithm(V_pi, piValueMatrixContainer, piPolicyMatrixContainer, piBestPathMatrixContainer);
     }
 
     // Event listeners
