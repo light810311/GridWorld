@@ -91,6 +91,9 @@ Policy Iteration interleaves two distinct steps until the policy stops changing:
 If the new policy $\pi'$ is identical to the old policy $\pi$, the algorithm has converged to the optimal policy.
 
 ### Comparison: Value Iteration vs Policy Iteration
+
+<img width="1003" height="884" alt="image" src="https://github.com/user-attachments/assets/bfab8e85-0384-43c8-821f-777602cc76b7" />
+
 While both algorithms compute the optimal policy for an MDP, they differ in their approach:
 - **Value Iteration** computes the absolute optimal value function first, repeatedly updating values across all states, and only extracts the optimal policy once at the very end. It's often computationally simpler per sweep but may take many iterations to converge.
 - **Policy Iteration** starts with a complete policy, evaluates it fully, and then improves it. Because it searches the space of policies rather than the space of continuous values, it often converges in significantly fewer iterations, although the policy evaluation step can be computationally expensive for very large state spaces.
